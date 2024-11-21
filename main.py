@@ -1,64 +1,36 @@
-class Node:
-    def __init__(self, char, freq):
-        self.char = char
-        self.freq = freq
-        self.left = None
-        self.right = None
+import heapq
+from collections import Counter
 
-    def __lt__(self, other):
-        return self.freq < other.freq
+def huffman_coding(input_string):
+    # Count frequency of each character in the input string
+    freq_tab = dict(Counter(input_string))
+    huff_tree = [[freq, [char,""]] for char, freq in freq_tab.items()]
 
-def sort_queue(queue):
-    # Helper function to maintain a sorted queue based on frequencies
-    return sorted(queue, key=lambda node: node.freq)
+    # Build a Huffman Tree based on the character encodings
+    heapq.heapify(huff_tree)
+    
+    while len(huff_tree) > 1:
+        # pull out the lowest two nodes
+        low1 = heapq.heappop(huff_tree)
+        low2 = heapq.heappop(huff_tree)
+    
+        # Append the 0 code for the left and right branches
+        for pair in low1[1:]:
+            pair[1] = "0" + pair[1]
 
-def build_huffman_tree(frequency):
-    queue = [Node(char, freq) for char, freq in frequency.items()]
-    queue = sort_queue(queue)
+        for pair in low2[1:]:
+            pair[1] = "1" + pair[1]
 
-    while len(queue) > 1:
-        # Take the two nodes with the smallest frequency
-        left = queue.pop(0)
-        right = queue.pop(0)
+        accrued_val = low1[0] + low2[0]
+        heapq.heappush(huff_tree, [accrued_val] + low1[1:] + low2[1:])
+    
+# Generate Binary codes for the Character tree
+    huff_tree = huff_tree[0][1:]
 
-        # Create a new internal node with combined frequency
-        merged = Node(None, left.freq + right.freq)
-        merged.left = left
-        merged.right = right
-
-        # Add the new node to the queue
-        queue.append(merged)
-        queue = sort_queue(queue)
-
-    return queue[0]  # Root of the tree
-
-def generate_codes(root, current_code, codes):
-    if root is None:
-        return
-
-    # If a leaf node is reached, assign its code
-    if root.char is not None:
-        codes[root.char] = current_code
-        return
-
-    # Traverse left and right
-    generate_codes(root.left, current_code + "0", codes)
-    generate_codes(root.right, current_code + "1", codes)
-
-def huffman_coding(sentence):
-    # Step 1: Count frequency of each character
-    frequency = {}
-    for char in sentence:
-        frequency[char] = frequency.get(char, 0) + 1
-
-    # Step 2: Build the Huffman tree
-    root = build_huffman_tree(frequency)
-
-    # Step 3: Generate binary codes
-    codes = {}
-    generate_codes(root, "", codes)
-
-    # Step 4: Encode the input string
-    encoded_string = "".join(codes[char] for char in sentence)
-
-    return encoded_string, codes
+# Encode the input string
+    huff_codes = {char:code for char, code in huff_tree}
+    encoded_string = "".join(huff_codes[char] for char in input_string)
+    return encoded_string
+    
+# encoded_string = huffman_coding('hello')
+# print(encoded_string)
