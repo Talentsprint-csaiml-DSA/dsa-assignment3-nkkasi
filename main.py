@@ -45,7 +45,7 @@ def generate_codes(root, current_code, codes):
     generate_codes(root.left, current_code + "0", codes)
     generate_codes(root.right, current_code + "1", codes)
 
-def Huffman_coding(sentence):
+def huffman_coding(sentence):
     # Step 1: Count frequency of each character
     frequency = {}
     for char in sentence:
